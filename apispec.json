@@ -1,23 +1,23 @@
 {
-    "openapi":"3.0.2",
-    "info": {
-      "title":"Category RESTful API",
-      "description": "API Spec for Category RESTful API",
-      "version":"1.0.0"
-    },
-    "servers": [
-        {
-          "url":"http://localhost:3000/api"
-        }
-    ],
-    "paths": {
-        "/categories": {
-            "get": {
+	"openapi":"3.0.2",
+	"info": {
+		"title":"Category RESTful API",
+		"description": "API Spec for Category RESTful API",
+		"version":"1.0.0"
+	},
+	"servers": [
+		{
+			"url":"http://localhost:3000/api"
+		}
+	],
+	"paths": {
+		"/categories": {
+			"get": {
 				"tags": ["Category API"],
-                "description": "List all Categories",
+				"description": "List all Categories",
 				"summary": "List all Categories",
-                "responses": {
-                    "200": {
+				"responses": {
+					"200": {
 						"description": "Success get all Categories",
 						"content": {
 							"application/json": {
@@ -40,9 +40,9 @@
 								}
 							}
 						}
-                    }
-                }
-            },
+					}
+				}
+			},
 			"post": {
 				"tags": ["Category API"],
 				"description": "Create new Category",
@@ -51,12 +51,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"type": "object",
-								"properties": {
-									"name": {
-										"type": "string"
-									}
-								}
+								"$ref": "#/components/schemas/CreateOrUpdateCategory"
 							}
 						}
 					}
@@ -85,7 +80,7 @@
 					}
 				}
 			}
-        },
+		},
 		"/categories/{categoryId}": {
 			"get": {
 				"tags": ["Category API"],
@@ -121,11 +116,63 @@
 						}
 					}
 				}
+			},
+			"put": {
+				"tags": ["Category API"],
+				"summary": "Update Category by Id",
+				"description": "Update Category by Id",
+				"parameters": [
+					{
+						"name": "categoryId",
+						"in": "path",
+						"description": "Category Id"
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateOrUpdateCategory"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Success create Category",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"code": {
+											"type": "number"
+										},
+										"status": {
+											"type": "string"
+										},
+										"data": {
+											"$ref": "#/components/schemas/Category"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
-    },
+	},
 	"components": {
 		"schemas": {
+			"CreateOrUpdateCategory": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					}
+				}
+			},
 			"Category": {
 				"type": "object",
 				"properties": {
@@ -139,4 +186,4 @@
 			}
 		}
 	}
-  }
+}
