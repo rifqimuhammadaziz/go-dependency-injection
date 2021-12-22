@@ -8,15 +8,15 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "name": "iMac"
+    "name": ""
 }
 
 ### Get category by Id
-GET http://localhost:3000/api/categories/3
+GET http://localhost:3000/api/categories/100
 Accept: application/json
 
 ### Update category by Id
-PUT http://localhost:3000/api/categories/2
+PUT http://localhost:3000/api/categories/10
 Accept: application/json
 Content-Type: application/json
 
