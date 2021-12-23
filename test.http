@@ -1,22 +1,26 @@
 ### Get all categories
 GET http://localhost:3000/api/categories
+X-API-KEY: SECRETKEY
 Accept: application/json
 
 ### Create new category
 POST http://localhost:3000/api/categories
+X-API-KEY: SECRETKEY
 Accept: application/json
 Content-Type: application/json
 
 {
-    "name": ""
+    "name": "iWatch"
 }
 
 ### Get category by Id
-GET http://localhost:3000/api/categories/100
+GET http://localhost:3000/api/categories/1
+X-API-KEY: SECRETKEY
 Accept: application/json
 
 ### Update category by Id
-PUT http://localhost:3000/api/categories/10
+PUT http://localhost:3000/api/categories/2
+X-API-KEY: SECRETKEY
 Accept: application/json
 Content-Type: application/json
 
@@ -25,5 +29,6 @@ Content-Type: application/json
 }
 
 ### Delete category by Id
-DELETE http://localhost:3000/api/categories/2
+DELETE http://localhost:3000/api/categories/3
+X-API-KEY: SECRETKEY
 Accept: application/json
