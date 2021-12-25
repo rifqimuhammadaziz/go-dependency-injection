@@ -1,12 +1,14 @@
 package test
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -17,6 +19,7 @@ import (
 	"github.com/rifqimuhammadaziz/go-restful-api/controller"
 	"github.com/rifqimuhammadaziz/go-restful-api/helper"
 	"github.com/rifqimuhammadaziz/go-restful-api/middleware"
+	"github.com/rifqimuhammadaziz/go-restful-api/model/domain"
 	"github.com/rifqimuhammadaziz/go-restful-api/repository"
 	"github.com/rifqimuhammadaziz/go-restful-api/service"
 	"github.com/stretchr/testify/assert"
@@ -53,6 +56,7 @@ func TestCreateCategorySuccess(t *testing.T) {
 	truncateCategory(db)
 	router := setupRouter(db)
 
+	// insert data
 	requestBody := strings.NewReader(`{"name": "iPhone"}`)
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:3000/api/categories", requestBody)
 	request.Header.Add("Content-Type", "application/json")
@@ -70,6 +74,7 @@ func TestCreateCategorySuccess(t *testing.T) {
 	json.Unmarshal(body, &responseBody)
 	fmt.Println(responseBody)
 
+	// testing
 	assert.Equal(t, 200, int(responseBody["code"].(float64)))
 	assert.Equal(t, "OK", responseBody["status"])
 	assert.Equal(t, "iPhone", responseBody["data"].(map[string]interface{})["name"])
@@ -80,6 +85,7 @@ func TestCreateCategoryFailed(t *testing.T) {
 	truncateCategory(db)
 	router := setupRouter(db)
 
+	// insert data
 	requestBody := strings.NewReader(`{"name": ""}`)
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:3000/api/categories", requestBody)
 	request.Header.Add("Content-Type", "application/json")
@@ -97,12 +103,48 @@ func TestCreateCategoryFailed(t *testing.T) {
 	json.Unmarshal(body, &responseBody)
 	fmt.Println(responseBody)
 
+	// testing
 	assert.Equal(t, 400, int(responseBody["code"].(float64)))
 	assert.Equal(t, "BAD REQUEST", responseBody["status"])
 }
 
 func TestUpdateCategorySuccess(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
 
+	// insert data
+	tx, _ := db.Begin()
+	categoryRepository := repository.NewCategoryRepository()
+	category := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "testing",
+	})
+	tx.Commit()
+
+	router := setupRouter(db)
+
+	// update data
+	requestBody := strings.NewReader(`{"name": "Apple Product"}`)
+	request := httptest.NewRequest(http.MethodPut, "http://localhost:3000/api/categories/"+strconv.Itoa(category.Id), requestBody)
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("X-API-KEY", "SECRETKEY")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 200, response.StatusCode)
+
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+	fmt.Println(responseBody)
+
+	// testing
+	assert.Equal(t, 200, int(responseBody["code"].(float64)))
+	assert.Equal(t, "OK", responseBody["status"])
+	assert.Equal(t, category.Id, int(responseBody["data"].(map[string]interface{})["id"].(float64)))
+	assert.Equal(t, "Apple Product", responseBody["data"].(map[string]interface{})["name"])
 }
 
 func TestUpdateCategoryFailed(t *testing.T) {
