@@ -10,16 +10,16 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "name": "iWatch"
+    "name": "testing"
 }
 
 ### Get category by Id
-GET http://localhost:3000/api/categories/1
+GET http://localhost:3000/api/categories/5
 X-API-KEY: SECRETKEY
 Accept: application/json
 
 ### Update category by Id
-PUT http://localhost:3000/api/categories/2
+PUT http://localhost:3000/api/categories/5
 X-API-KEY: SECRETKEY
 Accept: application/json
 Content-Type: application/json
