@@ -249,17 +249,139 @@ func TestGetCategoryFailed(t *testing.T) {
 }
 
 func TestDeleteCategorySuccess(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
 
+	// insert data
+	tx, _ := db.Begin()
+	categoryRepository := repository.NewCategoryRepository()
+	category := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "testing delete",
+	})
+	tx.Commit()
+
+	router := setupRouter(db)
+
+	// delete data
+	request := httptest.NewRequest(http.MethodDelete, "http://localhost:3000/api/categories/"+strconv.Itoa(category.Id), nil)
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("X-API-KEY", "SECRETKEY")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 200, response.StatusCode)
+
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+	fmt.Println(responseBody)
+
+	// testing
+	assert.Equal(t, 200, int(responseBody["code"].(float64)))
+	assert.Equal(t, "OK", responseBody["status"])
 }
 
 func TestDeleteCategoryFailed(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
+	router := setupRouter(db)
 
+	// delete data (with id: 123)
+	request := httptest.NewRequest(http.MethodDelete, "http://localhost:3000/api/categories/123", nil)
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("X-API-KEY", "SECRETKEY")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 404, response.StatusCode)
+
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+	fmt.Println(responseBody)
+
+	// testing
+	assert.Equal(t, 404, int(responseBody["code"].(float64)))
+	assert.Equal(t, "NOT FOUND", responseBody["status"])
 }
 
 func TestListCategoriesSuccess(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
 
+	// insert data
+	tx, _ := db.Begin()
+	categoryRepository := repository.NewCategoryRepository()
+	category1 := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "testing data 1",
+	})
+	category2 := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "testing data 2",
+	})
+	tx.Commit()
+
+	router := setupRouter(db)
+
+	// get data by id
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:3000/api/categories", nil)
+	request.Header.Add("X-API-KEY", "SECRETKEY")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 200, response.StatusCode)
+
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+	fmt.Println(responseBody)
+
+	// testing
+	assert.Equal(t, 200, int(responseBody["code"].(float64)))
+	assert.Equal(t, "OK", responseBody["status"])
+
+	// convert
+	var categories = responseBody["data"].([]interface{})
+	categoryResponse1 := categories[0].(map[string]interface{})
+	categoryResponse2 := categories[1].(map[string]interface{})
+
+	assert.Equal(t, category1.Id, int(categoryResponse1["id"].(float64)))
+	assert.Equal(t, category1.Name, categoryResponse1["name"])
+
+	assert.Equal(t, category2.Id, int(categoryResponse2["id"].(float64)))
+	assert.Equal(t, category2.Name, categoryResponse2["name"])
 }
 
 func TestUnauthorized(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
+	router := setupRouter(db)
 
+	// get data by id using wrong X-API-KEY
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:3000/api/categories", nil)
+	request.Header.Add("X-API-KEY", "WRONGKEY")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 401, response.StatusCode)
+
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+	fmt.Println(responseBody)
+
+	// testing
+	assert.Equal(t, 401, int(responseBody["code"].(float64)))
+	assert.Equal(t, "UNAUTHORIZED", responseBody["status"])
 }
