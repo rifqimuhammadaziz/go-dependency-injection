@@ -219,11 +219,33 @@ func TestGetCategorySuccess(t *testing.T) {
 	assert.Equal(t, "OK", responseBody["status"])
 	assert.Equal(t, category.Id, int(responseBody["data"].(map[string]interface{})["id"].(float64)))
 	assert.Equal(t, category.Name, responseBody["data"].(map[string]interface{})["name"])
-
 }
 
 func TestGetCategoryFailed(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
 
+	router := setupRouter(db)
+
+	// get data by id
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:3000/api/categories/1", nil)
+	request.Header.Add("X-API-KEY", "SECRETKEY")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 404, response.StatusCode)
+
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+	fmt.Println(responseBody)
+
+	// testing
+	assert.Equal(t, 404, int(responseBody["code"].(float64)))
+	assert.Equal(t, "NOT FOUND", responseBody["status"])
 }
 
 func TestDeleteCategorySuccess(t *testing.T) {
