@@ -148,7 +148,40 @@ func TestUpdateCategorySuccess(t *testing.T) {
 }
 
 func TestUpdateCategoryFailed(t *testing.T) {
+	db := setupTestDB()
+	truncateCategory(db)
 
+	// insert data
+	tx, _ := db.Begin()
+	categoryRepository := repository.NewCategoryRepository()
+	category := categoryRepository.Save(context.Background(), tx, domain.Category{
+		Name: "testing",
+	})
+	tx.Commit()
+
+	router := setupRouter(db)
+
+	// update data
+	requestBody := strings.NewReader(`{"name": ""}`)
+	request := httptest.NewRequest(http.MethodPut, "http://localhost:3000/api/categories/"+strconv.Itoa(category.Id), requestBody)
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("X-API-KEY", "SECRETKEY")
+
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	response := recorder.Result()
+	assert.Equal(t, 400, response.StatusCode)
+
+	body, _ := io.ReadAll(response.Body)
+	var responseBody map[string]interface{}
+	json.Unmarshal(body, &responseBody)
+	fmt.Println(responseBody)
+
+	// testing
+	assert.Equal(t, 400, int(responseBody["code"].(float64)))
+	assert.Equal(t, "BAD REQUEST", responseBody["status"])
 }
 
 func TestGetCategorySuccess(t *testing.T) {
