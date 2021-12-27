@@ -7,7 +7,7 @@ package simple
 
 // Injectors from injector.go:
 
-func InitializedService() (*SimpleService, error) {
+func InitializedService(isError bool) (*SimpleService, error) {
 	simpleRepository := NewSimpleRepository()
 	simpleService, err := NewSimpleService(simpleRepository)
 	if err != nil {
