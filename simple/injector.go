@@ -20,3 +20,16 @@ func InitializedDatabaseRepository() *DatabaseRepository {
 	)
 	return nil
 }
+
+// GROUPING (PROVIDER SET)
+var fooSet = wire.NewSet(NewFooRepository, NewFooService) // for foo only
+var barSet = wire.NewSet(NewBarRepository, NewBarService) // for bar only
+
+func InitializedFooBarService() *FooBarService {
+	wire.Build(
+		fooSet,
+		barSet,
+		NewFooBarService,
+	)
+	return nil
+}
