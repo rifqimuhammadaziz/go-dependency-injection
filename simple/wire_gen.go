@@ -78,6 +78,12 @@ var (
 	_wireFileValue = os.Stdin
 )
 
+func InitializedConfiguration() *Configuration {
+	application := NewApplication()
+	configuration := application.Configuration
+	return configuration
+}
+
 // injector.go:
 
 // GROUPING (PROVIDER SET)
