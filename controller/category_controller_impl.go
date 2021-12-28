@@ -14,7 +14,7 @@ type CategoryControllerImpl struct {
 	CategoryService service.CategoryService // service.CategoryService is interface, no need to set pointer
 }
 
-func NewCategoryController(categoryService service.CategoryService) CategoryController {
+func NewCategoryController(categoryService service.CategoryService) *CategoryControllerImpl {
 	return &CategoryControllerImpl{
 		CategoryService: categoryService,
 	}
