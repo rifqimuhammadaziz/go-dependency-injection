@@ -36,8 +36,19 @@ func InitializedFooBarService() *FooBarService {
 	return fooBarService
 }
 
+func InitializedHelloService() *HelloService {
+	sayHelloImpl := NewSayHelloImpl()
+	helloService := NewHelloService(sayHelloImpl)
+	return helloService
+}
+
 // injector.go:
 
+// GROUPING (PROVIDER SET)
 var fooSet = wire.NewSet(NewFooRepository, NewFooService) // for foo only
 
 var barSet = wire.NewSet(NewBarRepository, NewBarService) // for bar only
+
+var helloSet = wire.NewSet(
+	NewSayHelloImpl, wire.Bind(new(SayHello), new(*SayHelloImpl)),
+)
